@@ -1,0 +1,26 @@
+{
+  "name": "xyqweb/log",
+  "type": "library",
+  "keywords": [
+    "xyqweb",
+    "sms"
+  ],
+  "description": "create by wya team",
+  "require": {
+    "php": ">=7.1.0",
+    "ext-ctype": "*",
+    "ext-json": "*"
+  },
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "xyq",
+      "email": "xyqweb@126.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "xyqWeb\\log\\": "src"
+    }
+  }
+}
