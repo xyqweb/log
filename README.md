@@ -16,7 +16,7 @@
 
         composer require xyqweb/log
 
-   You can also declare the dependency on Alibaba Cloud OSS SDK for PHP in the `composer.json` file.
+   You can also declare the dependency on Log SDK for PHP in the `composer.json` file.
 
         "require": {
             "xyqweb/log": "~0.1"
