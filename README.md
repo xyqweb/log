@@ -30,8 +30,6 @@
 
 ### Initialize an LogClient
 
-The SDK's operations for the OSS are performed through the OSSClient class. The code below creates an OSSClient object:
-
 ```php
 
 <?php
