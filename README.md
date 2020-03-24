@@ -1,5 +1,6 @@
 # log SDK for php
-======
+
+----
 
 [![Latest Stable Version](https://packagist.org/packages/xyqweb/log)](https://packagist.org/packages/xyqweb/log)
 
