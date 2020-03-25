@@ -101,4 +101,14 @@ class File extends LogStrategy
             return false;
         }
     }
+
+    /**
+     * 关闭文件连接此处无需实现
+     *
+     * @author xyq
+     */
+    public function close()
+    {
+
+    }
 }

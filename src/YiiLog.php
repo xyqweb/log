@@ -3,28 +3,46 @@ declare(strict_types = 1);
 /**
  * Created by PhpStorm.
  * User: XYQ
- * Date: 2020-03-24
- * Time: 10:53
+ * Date: 2020-03-25
+ * Time: 15:08
  */
 
 namespace xyqWeb\log;
 
-
 use xyqWeb\log\drivers\LogException;
+use yii\base\Component;
+use yii\base\Application as BaseApp;
+use yii\base\Event;
 
-class Log
+class YiiLog extends Component
 {
     /**
      * @var \xyqWeb\log\drivers\LogStrategy
      */
-    protected $driver;
+    private $driver;
+    /**
+     * @var array 配置内容
+     */
+    public $config = [];
+
+    /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        parent::init();
+        $this->initDriver($this->config);
+        Event::on(BaseApp::class, BaseApp::EVENT_AFTER_REQUEST, function () {
+            $this->close();
+        });
+    }
 
     /**
      * Log constructor.
      * @param array $config
      * @throws LogException
      */
-    public function __construct(array $config)
+    public function initDriver(array $config)
     {
         if (!isset($config['driver']) || !in_array($config['driver'], ['ssdb', 'file'])) {
             throw new LogException('log driver error');

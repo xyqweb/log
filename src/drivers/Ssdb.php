@@ -26,6 +26,10 @@ class Ssdb extends LogStrategy
      * @var string 缓存key
      */
     protected $key;
+    /**
+     * @var array 连接配置项
+     */
+    protected $connectionConfig;
 
     /**
      * Ssdb constructor.
@@ -42,9 +46,24 @@ class Ssdb extends LogStrategy
             throw new LogException('Missing cache key');
         }
         $this->key = $config['key'];
-        $this->ssdb = new SimpleSSDB($config['host'], $config['port']);
+        $this->connectionConfig = [
+            'host' => $config['host'],
+            'port' => $config['port']
+        ];
+        $this->getSSDBConnection();
         $realPath = $this->getFinalPath($config);
         $this->path = $realPath . '/';
+    }
+
+    /**
+     * 获取ssdb连接
+     *
+     * @author xyq
+     * @throws ssdb\SSDBException
+     */
+    protected function getSSDBConnection()
+    {
+        $this->ssdb = new SimpleSSDB($this->connectionConfig['host'], $this->connectionConfig['port']);
     }
 
     /**
@@ -52,10 +71,11 @@ class Ssdb extends LogStrategy
      *
      * @author xyq
      * @param string $logName
-     * @param $logContent
+     * @param array|object|string $logContent
      * @param string $charList
      * @param int $jsonFormatCode
      * @return bool
+     * @throws ssdb\SSDBException
      */
     public function write(string $logName, $logContent, string $charList, int $jsonFormatCode) : bool
     {
@@ -72,10 +92,25 @@ class Ssdb extends LogStrategy
             'charList'       => $charList,
             'jsonFormatCode' => $jsonFormatCode,
         ];
+        if (false == $this->ssdb->closed()) {
+            $this->getSSDBConnection();
+        }
         if (is_int($this->ssdb->qpush_front($this->key, json_encode($data)))) {
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * 关闭ssdb连接
+     *
+     * @author xyq
+     */
+    public function close()
+    {
+        if (false == $this->ssdb->closed()) {
+            $this->ssdb->close();
         }
     }
 }

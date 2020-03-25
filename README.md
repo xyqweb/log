@@ -30,6 +30,8 @@
 
 ### Initialize an LogClient
 
+#### Load in normal mode
+     
 ```php
 
 <?php
@@ -45,4 +47,39 @@ $log->write('test.log', ['content' => 'this is test content']);
 // You can add subdirectories here
 $log->write('test/test.log', ['content' => 'this is test content']);
 
+
+$log = new \xyqWeb\log\Log([
+    'driver'  => 'ssdb',//only accept file or ssdb
+    'host'    => 'xx.xxx.xxx.xxx',//ssdb only
+    'port'    => 'xxxxx',//ssdb only
+    'project' => 'xxx',//your project name
+    'key'     => 'xxxx',//ssdb only
+    'path'    => 'path'//log path
+]);
+$log->write('test.log', ['content' => 'this is test content']);
+// You can add subdirectories here
+$log->write('test/test.log', ['content' => 'this is test content']);
+```
+
+#### Load in normal mode yii2
+```php
+'components' => [
+    'yiiLog' => [
+        'class' => 'xyqWeb\log\YiiLog',
+        'config'=>[
+            'driver'  => 'ssdb',//only accept file or ssdb
+            'host'    => 'xx.xxx.xxx.xxx',//ssdb only
+            'port'    => 'xxxxx',//ssdb only
+            'project' => 'xxx',//your project name
+            'key'     => 'xxxx',//ssdb only
+            'path'    => 'path'//log path
+        ]
+    ]
+]
+```
+
+
+```php
+Yii::$app->yiiLog->->write('test.log', ['content' => 'this is test content']);
+Yii::$app->yiiLog->write('test/test.log', ['content' => 'this is test content']);
 ```

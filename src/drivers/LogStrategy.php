@@ -25,6 +25,13 @@ abstract class LogStrategy
     abstract public function write(string $logName, $logContent, string $charList, int $jsonFormatCode) : bool;
 
     /**
+     * 关闭句柄
+     *
+     * @author xyq
+     */
+    abstract public function close();
+
+    /**
      * 获取最终的path路径
      *
      * @author xyq
