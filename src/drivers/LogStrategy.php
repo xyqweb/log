@@ -56,9 +56,10 @@ abstract class LogStrategy
     {
         $path = '';
         if (is_int(strpos($logName, '/'))) {
-            $logName = explode('/', $logName);
-            $logName = end($logName);
-            $path = trim(current($logName), '/');
+            $temp = explode('/', $logName);
+            $logName = array_pop($temp);
+            $temp = array_values(array_filter($temp));
+            $path = implode('/', $temp);
         }
         return ['logName' => $logName, 'path' => $path];
     }
