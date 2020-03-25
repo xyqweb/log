@@ -53,11 +53,12 @@ class Ssdb extends LogStrategy
      * @author xyq
      * @param string $logName
      * @param $logContent
+     * @param string $charList
+     * @param int $jsonFormatCode
      * @return bool
      */
-    public function write(string $logName, $logContent) : bool
+    public function write(string $logName, $logContent, string $charList, int $jsonFormatCode) : bool
     {
-        $logContent = ctype_alnum($logContent) ? $logContent : json_encode($logContent, JSON_UNESCAPED_UNICODE);
         $newNameArray = $this->resetLogName($logName);
         if (!empty($newNameArray['path'])) {
             $filePath = $this->path . $newNameArray['path'] . '/' . $newNameArray['logName'];
@@ -65,8 +66,10 @@ class Ssdb extends LogStrategy
             $filePath = $this->path . $newNameArray['logName'];
         }
         $data = [
-            'file'    => $filePath,
-            'content' => $logContent,
+            'file'           => $filePath,
+            'content'        => $logContent,
+            'charList'       => $charList,
+            'jsonFormatCode' => $jsonFormatCode,
         ];
         if (is_int($this->ssdb->qpush_front($this->key, json_encode($data)))) {
             return true;

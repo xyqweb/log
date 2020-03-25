@@ -74,12 +74,14 @@ class File extends LogStrategy
      * @author xyq
      * @param string $logName
      * @param $logContent
+     * @param string $charList
+     * @param int $jsonFormatCode
      * @return bool
      * @throws LogException
      */
-    public function write(string $logName, $logContent) : bool
+    public function write(string $logName, $logContent, string $charList, int $jsonFormatCode) : bool
     {
-        $logContent = is_array($logContent) ? json_encode($logContent, JSON_UNESCAPED_UNICODE) : $logContent;
+        $logContent = is_array($logContent) ? json_encode($logContent, $jsonFormatCode) : $logContent;
         $newNameArray = $this->resetLogName($logName);
         if (!empty($newNameArray['path'])) {
             $errorCode = $this->createDir($this->path . $newNameArray['path']);
@@ -92,7 +94,7 @@ class File extends LogStrategy
         } else {
             $filePath = $this->path . $newNameArray['logName'];
         }
-        $status = error_log($logContent, 3, $filePath);
+        $status = error_log($logContent . $charList, 3, $filePath);
         if (true == $status) {
             return true;
         } else {

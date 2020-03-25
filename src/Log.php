@@ -40,10 +40,12 @@ class Log
      * @author xyq
      * @param string $logName 日志名称
      * @param string|array|object $logContent 日志内容
+     * @param string $charList 日志分割符
+     * @param int $jsonFormatCode json格式化的code
      * @return bool
      */
-    public function write(string $logName, $logContent) : bool
+    public function write(string $logName, $logContent, string $charList = "\n", int $jsonFormatCode = JSON_UNESCAPED_UNICODE) : bool
     {
-        return $this->driver->write($logName, $logContent);
+        return $this->driver->write($logName, $logContent, $charList, $jsonFormatCode);
     }
 }

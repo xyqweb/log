@@ -16,11 +16,13 @@ abstract class LogStrategy
      * 写入日志
      *
      * @author xyq
-     * @param string $logName
-     * @param $logContent
+     * @param string $logName 日志名称
+     * @param string|array|object $logContent 日志内容
+     * @param string $charList 分隔符
+     * @param int $jsonFormatCode json格式化code
      * @return bool
      */
-    abstract public function write(string $logName, $logContent) : bool;
+    abstract public function write(string $logName, $logContent, string $charList, int $jsonFormatCode) : bool;
 
     /**
      * 获取最终的path路径
