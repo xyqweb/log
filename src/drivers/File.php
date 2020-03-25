@@ -94,7 +94,7 @@ class File extends LogStrategy
         } else {
             $filePath = $this->path . $newNameArray['logName'];
         }
-        $status = error_log($logContent . $charList, 3, $filePath);
+        $status = error_log(date('Y-m-d H:i:s') . '   ' . $logContent . $charList, 3, $filePath);
         if (true == $status) {
             return true;
         } else {

@@ -68,6 +68,7 @@ class Ssdb extends LogStrategy
         $data = [
             'file'           => $filePath,
             'content'        => $logContent,
+            'date'           => date('Y-m-d H:i:s'),
             'charList'       => $charList,
             'jsonFormatCode' => $jsonFormatCode,
         ];
