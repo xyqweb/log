@@ -48,8 +48,8 @@ class File extends LogStrategy
         }
         for ($i = 0; $i < 3; $i++) {
             try {
-                set_error_handler(function (int $number, string $message) {
-                    throw new \Exception($message, $number);
+                set_error_handler(function (int $number, string $message, string $errorFile = '', int $errorLine = 0, array $errContext = []) {
+                    throw new \Exception($message . "file: {$errorFile}, line: {$errorLine} ", $number);
                 });
                 mkdir($path, 0777, true);
             } catch (\Exception $e) {
