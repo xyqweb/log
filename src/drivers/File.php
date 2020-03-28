@@ -82,8 +82,10 @@ class File extends LogStrategy
     public function write(string $logName, $logContent, string $charList, int $jsonFormatCode) : bool
     {
         $logContent = is_array($logContent) ? json_encode($logContent, $jsonFormatCode) : $logContent;
-        if (is_array($logContent) || is_object($logContent)) {
+        if (is_array($logContent)) {
             $logContent = json_encode($logContent, $jsonFormatCode);
+        } elseif (is_object($logContent)) {
+            $logContent = var_export($logContent, true);
         }
         $newNameArray = $this->resetLogName($logName);
         if (!empty($newNameArray['path'])) {
