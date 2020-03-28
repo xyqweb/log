@@ -48,11 +48,11 @@ class File extends LogStrategy
         }
         for ($i = 0; $i < 3; $i++) {
             try {
-                set_error_handler(function (int $number, string $message, string $errorFile = '', int $errorLine = 0, array $errContext = []) {
-                    throw new \Exception($message . "file: {$errorFile}, line: {$errorLine} ", $number);
-                });
-                mkdir($path, 0777, true);
-            } catch (\Exception $e) {
+                $result = mkdir($path, 0777, true);
+                if (true == $result && is_dir($path)) {
+                    return 0;
+                }
+            } catch (\Throwable $e) {
                 $message = $e->getMessage();
                 if (strpos($message, 'Permission denied')) {
                     return 1;
@@ -82,6 +82,9 @@ class File extends LogStrategy
     public function write(string $logName, $logContent, string $charList, int $jsonFormatCode) : bool
     {
         $logContent = is_array($logContent) ? json_encode($logContent, $jsonFormatCode) : $logContent;
+        if (is_array($logContent) || is_object($logContent)) {
+            $logContent = json_encode($logContent, $jsonFormatCode);
+        }
         $newNameArray = $this->resetLogName($logName);
         if (!empty($newNameArray['path'])) {
             $errorCode = $this->createDir($this->path . $newNameArray['path']);
