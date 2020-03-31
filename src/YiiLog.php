@@ -10,6 +10,7 @@ declare(strict_types = 1);
 namespace xyqWeb\log;
 
 use xyqWeb\log\drivers\LogException;
+use xyqWeb\log\drivers\LogStrategy;
 use yii\base\Component;
 use yii\base\Application as BaseApp;
 use yii\base\Event;
@@ -19,7 +20,7 @@ class YiiLog extends Component
     /**
      * @var \xyqWeb\log\drivers\LogStrategy
      */
-    private $driver;
+    private static $driver;
     /**
      * @var array 配置内容
      */
@@ -38,18 +39,23 @@ class YiiLog extends Component
     }
 
     /**
-     * Log constructor.
+     * 初始化驱动
+     *
+     * @author xyq
      * @param array $config
      * @throws LogException
      */
-    public function initDriver(array $config)
+    public static function initDriver(array $config)
     {
         if (!isset($config['driver']) || !in_array($config['driver'], ['ssdb', 'file'])) {
             throw new LogException('log driver error');
         }
-        $driver = "\\xyqWeb\\log\\drivers\\" . ucfirst($config['driver']);
-        unset($config['driver']);
-        $this->driver = new $driver($config);
+        try {
+            $driver = "\\xyqWeb\\log\\drivers\\" . ucfirst($config['driver']);
+            self::$driver = new $driver($config);
+        } catch (\Exception $e) {
+            self::$driver = null;
+        }
     }
 
     /**
@@ -64,7 +70,18 @@ class YiiLog extends Component
      */
     public function write(string $logName, $logContent, string $charList = "\n", int $jsonFormatCode = JSON_UNESCAPED_UNICODE) : bool
     {
-        return $this->driver->write($logName, $logContent, $charList, $jsonFormatCode);
+        try {
+            if (!(self::$driver instanceof LogStrategy)) {
+                self::initDriver($this->config);
+            }
+            if (self::$driver instanceof LogStrategy) {
+                return self::$driver->write($logName, $logContent, $charList, $jsonFormatCode);
+            } else {
+                return false;
+            }
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**
@@ -74,6 +91,8 @@ class YiiLog extends Component
      */
     public function close()
     {
-        $this->driver->close();
+        if (self::$driver instanceof LogStrategy) {
+            self::$driver->close();
+        }
     }
 }
