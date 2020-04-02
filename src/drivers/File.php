@@ -108,6 +108,17 @@ class File extends LogStrategy
     }
 
     /**
+     * 文本类型的永不关闭
+     *
+     * @author xyq
+     * @return bool
+     */
+    public function closed() : bool
+    {
+        return false;
+    }
+
+    /**
      * 关闭文件连接此处无需实现
      *
      * @author xyq

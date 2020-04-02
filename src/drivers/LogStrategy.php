@@ -32,6 +32,14 @@ abstract class LogStrategy
     abstract public function close();
 
     /**
+     * 获取句柄状态
+     *
+     * @author xyq
+     * @return bool
+     */
+    abstract public function closed() : bool;
+
+    /**
      * 获取最终的path路径
      *
      * @author xyq

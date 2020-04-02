@@ -67,7 +67,7 @@ class Log
     public function write(string $logName, $logContent, string $charList = "\n", int $jsonFormatCode = JSON_UNESCAPED_UNICODE) : bool
     {
         try {
-            if (!(self::$driver instanceof LogStrategy)) {
+            if (!(self::$driver instanceof LogStrategy) || self::$driver->closed()) {
                 self::initDriver($this->config);
             }
             if (self::$driver instanceof LogStrategy) {

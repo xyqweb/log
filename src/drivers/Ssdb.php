@@ -103,6 +103,17 @@ class Ssdb extends LogStrategy
     }
 
     /**
+     * 返回关闭状态
+     *
+     * @author xyq
+     * @return bool
+     */
+    public function closed() : bool
+    {
+        return (bool)$this->ssdb->closed();
+    }
+
+    /**
      * 关闭ssdb连接
      *
      * @author xyq
