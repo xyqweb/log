@@ -85,7 +85,7 @@ class File extends LogStrategy
         if (is_array($logContent)) {
             $logContent = json_encode($logContent, $jsonFormatCode);
         } elseif (is_object($logContent)) {
-            $logContent = var_export($logContent, true);
+            $logContent = print_r($logContent, true);
         }
         $newNameArray = $this->resetLogName($logName);
         if (!empty($newNameArray['path'])) {
