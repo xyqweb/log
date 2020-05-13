@@ -14,6 +14,7 @@ use xyqWeb\log\drivers\LogStrategy;
 use yii\base\Component;
 use yii\base\Application as BaseApp;
 use yii\base\Event;
+use Yii;
 
 class YiiLog extends Component
 {
@@ -51,6 +52,9 @@ class YiiLog extends Component
             throw new LogException('log driver error');
         }
         try {
+            if (is_int(strpos($config['path'], '@'))) {
+                $config['path'] = Yii::getAlias($config['path']);
+            }
             $driver = "\\xyqWeb\\log\\drivers\\" . ucfirst($config['driver']);
             self::$driver = new $driver($config);
         } catch (\Exception $e) {
