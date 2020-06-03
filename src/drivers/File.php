@@ -25,13 +25,7 @@ class File extends LogStrategy
     public function __construct(array $config)
     {
         $realPath = $this->getFinalPath($config);
-        $errorCode = $this->createDir($realPath);
-        if (1 == $errorCode) {
-            throw new LogException("目录没有创建权限");
-        } elseif (2 == $errorCode) {
-            throw new LogException("目录创建失败，请检查!");
-        }
-        $this->path = $realPath . '/';
+        $this->path = $this->createDir($realPath) . '/';
     }
 
     /**
@@ -39,27 +33,35 @@ class File extends LogStrategy
      *
      * @author xyq
      * @param string $path
-     * @return int
+     * @return string
+     * @throws LogException
      */
-    private function createDir(string $path) : int
+    private function createDir(string $path) : string
     {
-        if (is_dir($path)) {
-            return 0;
-        }
         $code = 2;
-        $result = @mkdir($path, 0777, true);
-        if (false == $result) {
-            $error = error_get_last();
-            $message = $error['message'] ?? '';
-            if (strpos($message, 'Permission denied')) {
-                $code = 1;
-            } elseif (strpos($message, 'File exists')) {
+        if (is_dir($path)) {
+            $code = 0;
+        } else {
+            $result = @mkdir($path, 0777, true);
+            if (false == $result) {
+                $error = error_get_last();
+                $message = $error['message'] ?? '';
+                if (strpos($message, 'Permission denied')) {
+                    $code = 1;
+                } elseif (strpos($message, 'File exists')) {
+                    $code = 0;
+                }
+            } elseif (is_dir($path)) {
                 $code = 0;
             }
-        } elseif (is_dir($path)) {
-            $code = 0;
         }
-        return $code;
+        if (0 === $code) {
+            return $path;
+        } elseif (1 === $code) {
+            throw new LogException("目录没有创建权限");
+        } else {
+            throw new LogException("目录创建失败，请检查!");
+        }
     }
 
     /**
@@ -81,18 +83,12 @@ class File extends LogStrategy
         } elseif (is_object($logContent)) {
             $logContent = print_r($logContent, true);
         }
-        $finalPath = $this->path . date('Y-m-d') . '/';
+        $finalPath = $this->path . date('Y-m-d');
         $newNameArray = $this->resetLogName($logName);
         if (!empty($newNameArray['path'])) {
-            $errorCode = $this->createDir($finalPath . $newNameArray['path']);
-            if (1 == $errorCode) {
-                throw new LogException("目录没有创建权限");
-            } elseif (2 == $errorCode) {
-                throw new LogException("目录创建失败，请检查!");
-            }
-            $filePath = $finalPath . $newNameArray['path'] . '/' . $newNameArray['logName'];
+            $filePath = $this->createDir($finalPath . $newNameArray['path']) . '/' . $newNameArray['logName'];
         } else {
-            $filePath = $finalPath . $newNameArray['logName'];
+            $filePath = $this->createDir($finalPath) . '/' . $newNameArray['logName'];
         }
         $status = error_log(date('Y-m-d H:i:s') . '   ' . $logContent . $charList, 3, $filePath);
         if (true == $status) {
