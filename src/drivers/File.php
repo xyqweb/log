@@ -83,12 +83,12 @@ class File extends LogStrategy
         } elseif (is_object($logContent)) {
             $logContent = print_r($logContent, true);
         }
-        $finalPath = $this->path . date('Y-m-d');
+        $finalPath = $this->path . date('Y-m-d'). '/';
         $newNameArray = $this->resetLogName($logName);
         if (!empty($newNameArray['path'])) {
             $filePath = $this->createDir($finalPath . $newNameArray['path']) . '/' . $newNameArray['logName'];
         } else {
-            $filePath = $this->createDir($finalPath) . '/' . $newNameArray['logName'];
+            $filePath = $this->createDir($finalPath) . $newNameArray['logName'];
         }
         $status = error_log(date('Y-m-d H:i:s') . '   ' . $logContent . $charList, 3, $filePath);
         if (true == $status) {
