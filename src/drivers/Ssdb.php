@@ -80,10 +80,11 @@ class Ssdb extends LogStrategy
     public function write(string $logName, $logContent, string $charList, int $jsonFormatCode) : bool
     {
         $newNameArray = $this->resetLogName($logName);
+        $finalPath = $this->path . date('Y-m-d') . '/';
         if (!empty($newNameArray['path'])) {
-            $filePath = $this->path . $newNameArray['path'] . '/' . $newNameArray['logName'];
+            $filePath = $finalPath . $newNameArray['path'] . '/' . $newNameArray['logName'];
         } else {
-            $filePath = $this->path . $newNameArray['logName'];
+            $filePath = $finalPath . $newNameArray['logName'];
         }
         $data = [
             'file'           => $filePath,

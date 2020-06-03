@@ -81,17 +81,18 @@ class File extends LogStrategy
         } elseif (is_object($logContent)) {
             $logContent = print_r($logContent, true);
         }
+        $finalPath = $this->path . date('Y-m-d') . '/';
         $newNameArray = $this->resetLogName($logName);
         if (!empty($newNameArray['path'])) {
-            $errorCode = $this->createDir($this->path . $newNameArray['path']);
+            $errorCode = $this->createDir($finalPath . $newNameArray['path']);
             if (1 == $errorCode) {
                 throw new LogException("目录没有创建权限");
             } elseif (2 == $errorCode) {
                 throw new LogException("目录创建失败，请检查!");
             }
-            $filePath = $this->path . $newNameArray['path'] . '/' . $newNameArray['logName'];
+            $filePath = $finalPath . $newNameArray['path'] . '/' . $newNameArray['logName'];
         } else {
-            $filePath = $this->path . $newNameArray['logName'];
+            $filePath = $finalPath . $newNameArray['logName'];
         }
         $status = error_log(date('Y-m-d H:i:s') . '   ' . $logContent . $charList, 3, $filePath);
         if (true == $status) {

@@ -56,7 +56,6 @@ abstract class LogStrategy
         if (isset($config['project'])) {
             $config['path'] .= '/' . $config['project'];
         }
-        $config['path'] .= '/' . date('Y-m-d');
         return $config['path'];
     }
 
