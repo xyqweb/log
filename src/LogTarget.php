@@ -115,7 +115,7 @@ class LogTarget extends Target
             if ($this->infoMinTime > 0) {
                 $first = current($this->messages);
                 if (isset($first[1]) && 4 == $first[1]) {
-                    if (bcsub((string)microtime(true), (string)$_SERVER['REQUEST_TIME'] ?? 0) < $this->infoMinTime) {
+                    if (bcsub((string)microtime(true), (string)$_SERVER['REQUEST_TIME_FLOAT'] ?? 0) < $this->infoMinTime) {
                         $isWrite = false;
                     }
                 }
