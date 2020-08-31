@@ -27,6 +27,10 @@ class LogTarget extends Target
      */
     public $isYiiLog;
     /**
+     * @var int 记录info时间最小单位
+     */
+    public $infoMinTime = 0;
+    /**
      * @var bool whether log files should be rotated when they reach a certain [[maxFileSize|maximum size]].
      * Log rotation is enabled by default. This property allows you to disable it, when you have configured
      * an external tools for log rotation on your server.
@@ -107,8 +111,19 @@ class LogTarget extends Target
     public function export()
     {
         if ($this->isYiiLog) {
-            $text = implode("\n", array_map([$this, 'formatMessage'], $this->messages)) . "\n";
-            Yii::$app->get('yiiLog')->write($this->logFile, $text);
+            $isWrite = true;
+            if ($this->infoMinTime > 0) {
+                $first = current($this->messages);
+                if (isset($first[1]) && 4 == $first[1]) {
+                    if (bcsub((string)microtime(true), (string)$_SERVER['REQUEST_TIME'] ?? 0) < $this->infoMinTime) {
+                        $isWrite = false;
+                    }
+                }
+            }
+            if ($isWrite) {
+                $text = implode("\n", array_map([$this, 'formatMessage'], $this->messages)) . "\n";
+                Yii::$app->get('yiiLog')->write($this->logFile, $text);
+            }
         } else {
             $logPath = dirname($this->logFile);
             FileHelper::createDirectory($logPath, $this->dirMode, true);
