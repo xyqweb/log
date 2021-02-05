@@ -388,6 +388,10 @@ class SSDB
         foreach ($params as $p) {
             if (is_array($p)) {
                 $req = array_merge($req, $p);
+            } elseif (is_bool($p)) {
+                $req[] = $p ? 'true' : 'false';
+            } elseif (!is_string($p)) {
+                $req[] = (string)$p;
             } else {
                 $req[] = $p;
             }
