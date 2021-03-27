@@ -20,9 +20,10 @@ abstract class LogStrategy
      * @param string|array|object $logContent 日志内容
      * @param string $charList 分隔符
      * @param int $jsonFormatCode json格式化code
+     * @param string $time 发生时间
      * @return bool
      */
-    abstract public function write(string $logName, $logContent, string $charList, int $jsonFormatCode) : bool;
+    abstract public function write(string $logName, $logContent, string $charList, int $jsonFormatCode, string $time) : bool;
 
     /**
      * 关闭句柄

@@ -23,6 +23,10 @@ class Log
      * @var array 配置
      */
     private $config;
+    /**
+     * @var array
+     */
+    private $message = [];
 
     /**
      * Log constructor.
@@ -31,11 +35,14 @@ class Log
      */
     public function __construct(array $config)
     {
-        if (!isset($config['driver']) || !in_array($config['driver'], ['ssdb', 'file'])) {
+        if (!isset($config['driver']) || !in_array($config['driver'], ['ssdb', 'file', 'redis'])) {
             throw new LogException('log driver error');
         }
         $this->config = $config;
-        $this->initDriver($config);
+        register_shutdown_function(function () {
+            $this->flush();
+            register_shutdown_function([$this, 'close'], true);
+        });
     }
 
     /**
@@ -46,12 +53,32 @@ class Log
      */
     private static function initDriver($config)
     {
-        try {
-            $driver = "\\xyqWeb\\log\\drivers\\" . ucfirst($config['driver']);
-            self::$driver = new $driver($config);
-        } catch (\Exception $e) {
-            self::$driver = null;
+        if (is_null(self::$driver)) {
+            try {
+                $driver = '\xyqWeb\log\drivers\\' . ucfirst($config['driver']);
+                self::$driver = new $driver($config);
+            } catch (\Exception $e) {
+                self::$driver = null;
+            }
         }
+    }
+
+    /**
+     * 执行日志推送
+     *
+     * @author xyq
+     */
+    public function flush()
+    {
+        if (!empty($this->message)) {
+            $this->initDriver($this->config);
+            if (!is_null(self::$driver)) {
+                foreach ($this->message as $item) {
+                    self::$driver->write($item['name'], $item['content'], $item['charList'], $item['format'], $item['time']);
+                }
+            }
+        }
+        $this->message = [];
     }
 
     /**
@@ -71,11 +98,42 @@ class Log
                 self::initDriver($this->config);
             }
             if (self::$driver instanceof LogStrategy) {
-                return self::$driver->write($logName, $logContent, $charList, $jsonFormatCode);
+                $this->message[] = ['name' => $logName, 'content' => $logContent, 'charList' => $charList, 'format' => $jsonFormatCode, 'time' => date('Y-m-d H:i:s')];
+                if (count($this->message) > 10) {
+                    $this->flush();
+                }
+                return true;
             } else {
                 return false;
             }
         } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * 获取临时存储的文件
+     *
+     * @author xyq
+     * @param int|null $port
+     * @param string|null $key
+     * @param int $size
+     * @return bool
+     */
+    public function get(int $port = null, string $key = null, int $size = 1)
+    {
+        if (!is_null($port) && $port > 0) {
+            $this->config['port'] = $port;
+        }
+        if (!is_null($key) && !empty($key)) {
+            $this->config['key'] = $key;
+        }
+        if (!(self::$driver instanceof LogStrategy) || self::$driver->closed()) {
+            self::initDriver($this->config);
+        }
+        if (self::$driver instanceof LogStrategy) {
+            return self::$driver->get($size);
+        } else {
             return false;
         }
     }
@@ -90,5 +148,6 @@ class Log
         if (self::$driver instanceof LogStrategy) {
             self::$driver->close();
         }
+        self::$driver = null;
     }
 }

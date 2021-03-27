@@ -12,8 +12,6 @@ namespace xyqWeb\log;
 use xyqWeb\log\drivers\LogException;
 use xyqWeb\log\drivers\LogStrategy;
 use yii\base\Component;
-use yii\base\Application as BaseApp;
-use yii\base\Event;
 use Yii;
 
 class YiiLog extends Component
@@ -26,6 +24,10 @@ class YiiLog extends Component
      * @var array 配置内容
      */
     public $config = [];
+    /**
+     * @var array 临时保存日志内容
+     */
+    private $message = [];
 
     /**
      * @inheritdoc
@@ -33,9 +35,9 @@ class YiiLog extends Component
     public function init()
     {
         parent::init();
-        $this->initDriver($this->config);
-        Event::on(BaseApp::class, BaseApp::EVENT_AFTER_REQUEST, function () {
-            $this->close();
+        register_shutdown_function(function () {
+            $this->flush();
+            register_shutdown_function([$this, 'close'], true);
         });
     }
 
@@ -48,18 +50,39 @@ class YiiLog extends Component
      */
     public static function initDriver(array $config)
     {
-        if (!isset($config['driver']) || !in_array($config['driver'], ['ssdb', 'file'])) {
-            throw new LogException('log driver error');
-        }
-        try {
-            if (is_int(strpos($config['path'], '@'))) {
-                $config['path'] = Yii::getAlias($config['path']);
+        if (is_null(self::$driver)) {
+            if (!isset($config['driver']) || !in_array($config['driver'], ['ssdb', 'file'])) {
+                throw new LogException('log driver error');
             }
-            $driver = "\\xyqWeb\\log\\drivers\\" . ucfirst($config['driver']);
-            self::$driver = new $driver($config);
-        } catch (\Exception $e) {
-            self::$driver = null;
+            try {
+                if (is_int(strpos($config['path'], '@'))) {
+                    $config['path'] = Yii::getAlias($config['path']);
+                }
+                $driver = "\\xyqWeb\\log\\drivers\\" . ucfirst($config['driver']);
+                self::$driver = new $driver($config);
+            } catch (\Exception $e) {
+                self::$driver = null;
+            }
         }
+    }
+
+    /**
+     * 执行日志推送
+     *
+     * @author xyq
+     * @throws LogException
+     */
+    public function flush()
+    {
+        if (!empty($this->message)) {
+            $this->initDriver($this->config);
+            if (!is_null(self::$driver)) {
+                foreach ($this->message as $item) {
+                    self::$driver->write($item['name'], $item['content'], $item['charList'], $item['format'], $item['time']);
+                }
+            }
+        }
+        $this->message = [];
     }
 
     /**
@@ -79,11 +102,43 @@ class YiiLog extends Component
                 self::initDriver($this->config);
             }
             if (self::$driver instanceof LogStrategy) {
-                return self::$driver->write($logName, $logContent, $charList, $jsonFormatCode);
+                $this->message[] = ['name' => $logName, 'content' => $logContent, 'charList' => $charList, 'format' => $jsonFormatCode, 'time' => date('Y-m-d H:i:s')];
+                if (count($this->message) > 10) {
+                    $this->flush();
+                }
+                return true;
             } else {
                 return false;
             }
         } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * 获取临时存储的文件
+     *
+     * @author xyq
+     * @param int|null $port
+     * @param string|null $key
+     * @param int $size
+     * @return bool
+     * @throws LogException
+     */
+    public function get(int $port = null, string $key = null, int $size = 1)
+    {
+        if (!is_null($port) && $port > 0) {
+            $this->config['port'] = $port;
+        }
+        if (!is_null($key) && !empty($key)) {
+            $this->config['key'] = $key;
+        }
+        if (!(self::$driver instanceof LogStrategy) || self::$driver->closed()) {
+            self::initDriver($this->config);
+        }
+        if (self::$driver instanceof LogStrategy) {
+            return self::$driver->get($size);
+        } else {
             return false;
         }
     }
@@ -98,5 +153,6 @@ class YiiLog extends Component
         if (self::$driver instanceof LogStrategy) {
             self::$driver->close();
         }
+        self::$driver = null;
     }
 }
