@@ -24,22 +24,6 @@ class YiiLog extends Component
      * @var array 配置内容
      */
     public $config = [];
-    /**
-     * @var array 临时保存日志内容
-     */
-    private $message = [];
-
-    /**
-     * @inheritdoc
-     */
-    public function init()
-    {
-        parent::init();
-        register_shutdown_function(function () {
-            $this->flush();
-            register_shutdown_function([$this, 'close'], true);
-        });
-    }
 
     /**
      * 初始化驱动
@@ -67,25 +51,6 @@ class YiiLog extends Component
     }
 
     /**
-     * 执行日志推送
-     *
-     * @author xyq
-     * @throws LogException
-     */
-    public function flush()
-    {
-        if (!empty($this->message)) {
-            $this->initDriver($this->config);
-            if (!is_null(self::$driver)) {
-                foreach ($this->message as $item) {
-                    self::$driver->write($item['name'], $item['content'], $item['charList'], $item['format'], $item['time']);
-                }
-            }
-        }
-        $this->message = [];
-    }
-
-    /**
      * 写入日志
      *
      * @author xyq
@@ -101,15 +66,7 @@ class YiiLog extends Component
             if (!(self::$driver instanceof LogStrategy) || self::$driver->closed()) {
                 self::initDriver($this->config);
             }
-            if (self::$driver instanceof LogStrategy) {
-                $this->message[] = ['name' => $logName, 'content' => $logContent, 'charList' => $charList, 'format' => $jsonFormatCode, 'time' => date('Y-m-d H:i:s')];
-                if (count($this->message) > 10) {
-                    $this->flush();
-                }
-                return true;
-            } else {
-                return false;
-            }
+            return self::$driver->write($logName, $logContent, $charList, $jsonFormatCode, date('Y-m-d H:i:s'));
         } catch (\Exception $e) {
             return false;
         }
