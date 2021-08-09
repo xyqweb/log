@@ -23,10 +23,6 @@ class Log
      * @var array 配置
      */
     private $config;
-    /**
-     * @var array
-     */
-    private $message = [];
 
     /**
      * Log constructor.
@@ -39,10 +35,6 @@ class Log
             throw new LogException('log driver error');
         }
         $this->config = $config;
-        register_shutdown_function(function () {
-            $this->flush();
-            register_shutdown_function([$this, 'close'], true);
-        });
     }
 
     /**
@@ -64,24 +56,6 @@ class Log
     }
 
     /**
-     * 执行日志推送
-     *
-     * @author xyq
-     */
-    public function flush()
-    {
-        if (!empty($this->message)) {
-            $this->initDriver($this->config);
-            if (!is_null(self::$driver)) {
-                foreach ($this->message as $item) {
-                    self::$driver->write($item['name'], $item['content'], $item['charList'], $item['format'], $item['time']);
-                }
-            }
-        }
-        $this->message = [];
-    }
-
-    /**
      * 写入日志
      *
      * @author xyq
@@ -98,10 +72,7 @@ class Log
                 self::initDriver($this->config);
             }
             if (self::$driver instanceof LogStrategy) {
-                $this->message[] = ['name' => $logName, 'content' => $logContent, 'charList' => $charList, 'format' => $jsonFormatCode, 'time' => date('Y-m-d H:i:s')];
-                if (count($this->message) > 10) {
-                    $this->flush();
-                }
+                self::$driver->write($logName, $logContent, $charList, $jsonFormatCode, date('Y-m-d H:i:s'));
                 return true;
             } else {
                 return false;

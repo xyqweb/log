@@ -93,11 +93,28 @@ class Ssdb extends LogStrategy
             'charList'       => $charList,
             'jsonFormatCode' => $jsonFormatCode,
         ];
-        if (is_int($this->ssdb->qpush_front($this->key, json_encode($data)))) {
-            return true;
-        } else {
-            return false;
-        }
+        $retry = 0;
+        do {
+            try {
+                if (is_int($this->ssdb->qpush_front($this->key, json_encode($data)))) {
+                    $result = true;
+                    $retry = 2;
+                } else {
+                    $result = false;
+                }
+            } catch (\Exception $e) {
+                try {
+                    $this->close();
+                    $this->getSSDBConnection();
+                } catch (\Exception $exception) {
+                    //exception break
+                    $retry = 2;
+                }
+                $result = false;
+            }
+            !$result && $retry++;
+        } while (!$result && $retry < 2 && $retry > 0);
+        return $result;
     }
 
     /**

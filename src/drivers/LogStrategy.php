@@ -41,6 +41,15 @@ abstract class LogStrategy
     abstract public function closed() : bool;
 
     /**
+     * 获取日志
+     *
+     * @author xyq
+     * @param int $size
+     * @return mixed
+     */
+    abstract public function get(int $size);
+
+    /**
      * 获取最终的path路径
      *
      * @author xyq
