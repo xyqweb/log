@@ -31,7 +31,7 @@ class Log
      */
     public function __construct(array $config)
     {
-        if (!isset($config['driver']) || !in_array($config['driver'], ['ssdb', 'file', 'redis'])) {
+        if (!isset($config['driver']) || !in_array($config['driver'], ['ssdb', 'file', 'redis', 'seas'])) {
             throw new LogException('log driver error');
         }
         $this->config = $config;

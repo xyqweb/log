@@ -35,7 +35,7 @@ class YiiLog extends Component
     public static function initDriver(array $config)
     {
         if (is_null(self::$driver)) {
-            if (!isset($config['driver']) || !in_array($config['driver'], ['ssdb', 'file'])) {
+            if (!isset($config['driver']) || !in_array($config['driver'], ['ssdb', 'file', 'redis', 'seas'])) {
                 throw new LogException('log driver error');
             }
             try {
