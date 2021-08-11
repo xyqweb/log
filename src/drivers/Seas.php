@@ -50,7 +50,12 @@ class Seas extends LogStrategy
         } elseif (is_object($logContent)) {
             $logContent = print_r($logContent, true);
         }
-        $finalPath = $this->path . date('Y-m-d') . '/';
+        $appender = ini_get("seaslog.appender");
+        if (in_array($appender, [2, 3])) {
+            $finalPath = $this->path . date('Y-m-d') . '/';
+        } else {
+            $finalPath = date('Y-m-d') . '/';
+        }
         $newNameArray = $this->resetLogName($logName);
         if (!empty($newNameArray['path'])) {
             $filePath = $finalPath . $newNameArray['path'] . '/' . $newNameArray['logName'];
