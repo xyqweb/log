@@ -13,6 +13,11 @@ namespace xyqWeb\log\drivers;
 class Seas extends LogStrategy
 {
     /**
+     * @var string 日志主路径
+     */
+    protected $path;
+
+    /**
      * File constructor.
      * @param array $config
      * @throws LogException
@@ -22,8 +27,8 @@ class Seas extends LogStrategy
         if (!extension_loaded('SeasLog')) {
             throw new LogException('请先安装SeasLog组件');
         }
-        $path = $this->getFinalPath($config) . '/';
-        \SeasLog::setBasePath($path);
+        $this->path = $this->getFinalPath($config) . '/';
+        \SeasLog::setBasePath($this->path);
     }
 
     /**
@@ -45,7 +50,7 @@ class Seas extends LogStrategy
         } elseif (is_object($logContent)) {
             $logContent = print_r($logContent, true);
         }
-        $finalPath = date('Y-m-d') . '/';
+        $finalPath = $this->path . date('Y-m-d') . '/';
         $newNameArray = $this->resetLogName($logName);
         if (!empty($newNameArray['path'])) {
             $filePath = $finalPath . $newNameArray['path'] . '/' . $newNameArray['logName'];
