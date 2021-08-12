@@ -66,7 +66,12 @@ class YiiLog extends Component
             if (!(self::$driver instanceof LogStrategy) || self::$driver->closed()) {
                 self::initDriver($this->config);
             }
-            return self::$driver->write($logName, $logContent, $charList, $jsonFormatCode, date('Y-m-d H:i:s'));
+            if (self::$driver instanceof LogStrategy) {
+                self::$driver->write($logName, $logContent, $charList, $jsonFormatCode, date('Y-m-d H:i:s'));
+                return true;
+            } else {
+                return false;
+            }
         } catch (\Exception $e) {
             return false;
         }
