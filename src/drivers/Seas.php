@@ -50,7 +50,7 @@ class Seas extends LogStrategy
         } elseif (is_object($logContent)) {
             $logContent = print_r($logContent, true);
         } else {
-            $logContent = str_replace(["\n", "\r", "\t"], '=====', $logContent);
+            $logContent = str_replace(["\n", "\r", "\t"], '=====', (string)$logContent);
         }
         $appender = ini_get("seaslog.appender");
         if (in_array($appender, [2, 3])) {
