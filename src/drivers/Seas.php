@@ -99,6 +99,8 @@ class Seas extends LogStrategy
      */
     public function close()
     {
-        \SeasLog::closeLoggerStream();
+        if (PHP_SAPI == 'cli') {
+            \SeasLog::closeLoggerStream();
+        }
     }
 }
