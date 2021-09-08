@@ -35,6 +35,9 @@ class Log
             throw new LogException('log driver error');
         }
         $this->config = $config;
+        register_shutdown_function(function () {
+            $this->close();
+        });
     }
 
     /**
