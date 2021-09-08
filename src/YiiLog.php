@@ -13,6 +13,8 @@ use xyqWeb\log\drivers\LogException;
 use xyqWeb\log\drivers\LogStrategy;
 use yii\base\Component;
 use Yii;
+use yii\base\Application as BaseApp;
+use yii\base\Event;
 
 class YiiLog extends Component
 {
@@ -24,7 +26,18 @@ class YiiLog extends Component
      * @var array 配置内容
      */
     public $config = [];
-
+    
+    /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        parent::init();
+        Event::on(BaseApp::class, BaseApp::EVENT_AFTER_REQUEST, function () {
+            $this->close();
+        });
+    }
+    
     /**
      * 初始化驱动
      *
